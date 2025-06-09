@@ -4,8 +4,8 @@ import plotly.express as px
 # Cargar dimensiones desde archivos separados
 tiempo_df = pd.read_excel('tiempo.xlsx')
 estudiante_df = pd.read_excel('estudiante.xlsx')
-escuela_df = pd.read_excel('escuela.xlsx')
-causa_df = pd.read_excel('causa.xlsx')
+escuela_df = pd.read_excel('escuelas.xlsx')
+causa_df = pd.read_excel('causas.xlsx')
 
 # Simular hechos uniendo por índices
 num_registros = min(len(tiempo_df), len(estudiante_df), len(escuela_df), len(causa_df))
