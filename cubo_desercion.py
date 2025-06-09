@@ -54,7 +54,34 @@ fig = px.scatter_3d(
     z='dim_escuela',
     color='dim_causa',
     size='conteo',
-    hover_data=['anio', 'nivel_educativo', 'estado', 'causa_principal'],  # Más detalles al pasar el cursor
+    hover_data=['anio', 'nivel_educativo', 'estado', 'causa_principal','nombre_escuela'],  # Más detalles al pasar el cursor
     title='Cubo de Datos 3D con Todas las Dimensiones'
 )
+
+#Número de casos por año y causa de deserción
+pivot_1 = pd.pivot_table(
+    data_cube,
+    values='conteo',
+    index='anio',           # filas
+    columns='causa_principal',  # columnas
+    aggfunc='sum',          # función de agregación
+    fill_value=0            # reemplaza NaNs con 0
+)
+
+print(pivot_1)
+
+#Deserciones por estado y nivel educativo
+pivot_2 = pd.pivot_table(
+    data_cube,
+    values='conteo',
+    index='estado',
+    columns='nivel_educativo',
+    aggfunc='sum',
+    fill_value=0
+)
+
+print(pivot_2)
+
+
+
 fig.show()
