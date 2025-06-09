@@ -1,40 +1,41 @@
 import pandas as pd
 import plotly.express as px
 
-# Leer el Excel saltando metadatos
-df = pd.read_excel('Educacion.xlsx', skiprows=5)
+# Cargar dimensiones desde archivos separados
+tiempo_df = pd.read_excel('tiempo.xlsx')
+estudiante_df = pd.read_excel('estudiante.xlsx')
+escuela_df = pd.read_excel('escuela.xlsx')
+causa_df = pd.read_excel('causa_desercion.xlsx')
 
-# Reorganizar a formato largo
-df_long = df.melt(
-    id_vars=['Entidad federativa', 'Nivel educativo'],
-    var_name='anio',
-    value_name='casos'
-)
+# Simular hechos uniendo por índices
+num_registros = min(len(tiempo_df), len(estudiante_df), len(escuela_df), len(causa_df))
+hechos_df = pd.DataFrame({
+    'id_hecho': range(1, num_registros + 1),
+    'id_tiempo': range(1, num_registros + 1),
+    'id_estudiante': range(1, num_registros + 1),
+    'id_escuela': range(1, num_registros + 1),
+    'id_causa': range(1, num_registros + 1),
+})
 
-# Convertir casos a numérico, errores como NaN
-df_long['casos'] = pd.to_numeric(df_long['casos'], errors='coerce')
+# Unir todas las dimensiones al hecho
+data_cube = hechos_df \
+    .merge(tiempo_df.reset_index().rename(columns={'index': 'id_tiempo'}), on='id_tiempo') \
+    .merge(estudiante_df.reset_index().rename(columns={'index': 'id_estudiante'}), on='id_estudiante') \
+    .merge(escuela_df.reset_index().rename(columns={'index': 'id_escuela'}), on='id_escuela') \
+    .merge(causa_df.reset_index().rename(columns={'index': 'id_causa'}), on='id_causa')
 
-# Eliminar valores nulos
-df_long.dropna(subset=['casos'], inplace=True)
+# Agrega columna de conteo para la medida
+data_cube['conteo'] = 1
 
-# Eliminar o ajustar valores negativos
-df_long = df_long[df_long['casos'] >= 0]
-
-# Convertir año a texto
-df_long['anio'] = df_long['anio'].astype(str)
-
-# Escalar los tamaños si los valores son muy pequeños
-df_long['tamano'] = df_long['casos'] * 5  # ajusta el multiplicador según visualización
-
-# Crear gráfico 3D
+# Visualización 3D con Plotly (usa Año, Nivel educativo y Estado como ejes)
 fig = px.scatter_3d(
-    df_long,
-    x='anio',
+    data_cube,
+    x='Año',
     y='Nivel educativo',
-    z='Entidad federativa',
-    color='casos',
-    size='tamano',
-    title='Cubo 3D - Tasa de Abandono Escolar'
+    z='Estado',
+    color='conteo',
+    size='conteo',
+    title='Cubo de Datos 3D - Deserción Escolar'
 )
 
 fig.show()
