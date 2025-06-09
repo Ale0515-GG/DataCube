@@ -1,39 +1,24 @@
 import pandas as pd
 import plotly.express as px
 
+# Leer los datos desde el archivo Excel
+df = pd.read_excel('educacion.xlsx')
 
-# Datos simulados del modelo estrella
-data = {
-    'anio': [2021, 2021, 2022, 2022, 2023],
-    'mes': ['Enero', 'Febrero', 'Enero', 'Febrero', 'Marzo'],
-    'nivel_educativo': ['Secundaria', 'Media Superior', 'Media Superior', 'Superior', 'Superior'],
-    'edad': [14, 17, 16, 20, 21],
-    'sexo': ['F', 'M', 'F', 'F', 'M'],
-    'etnia': ['No', 'Sí', 'Sí', 'No', 'No'],
-    'comunidad': ['Rural', 'Urbana', 'Rural', 'Urbana', 'Rural'],
-    'estado': ['Oaxaca', 'CDMX', 'Chiapas', 'CDMX', 'Oaxaca'],
-    'servicios': ['Agua,Internet', 'Baños', 'Baños,Internet', 'Agua', 'Agua,Baños'],
-    'causa': ['Económica', 'Personal', 'Institucional', 'Económica', 'Contextual'],
-    'casos': [5, 10, 7, 4, 3]
-}
-
-df = pd.DataFrame(data)
-
-# Mostrar tabla original
-print("== Datos originales ==")
+# Mostrar la tabla original
+print("== Datos del archivo Excel ==")
 print(df)
 
-
-# Usamos solo 3 dimensiones para simplificar
+# Cubo 3D con Plotly
 fig = px.scatter_3d(
     df,
-    x='anio',
-    y='nivel_educativo',
-    z='causa',
-    color='casos',
-    size='casos',
-    symbol='sexo',
+    x='anio',               # Eje X: Año
+    y='nivel_educativo',    # Eje Y: Nivel educativo
+    z='causa',              # Eje Z: Causa de deserción
+    color='casos',          # Color: número de casos
+    size='casos',           # Tamaño del punto según número de casos
+    symbol='sexo',          # Diferenciar por sexo
     title='Cubo de Datos 3D - Deserción Escolar'
 )
 
+# Mostrar el gráfico interactivo
 fig.show()
