@@ -43,7 +43,7 @@ data_cube['conteo'] = 1
 
 data_cube['dim_tiempo'] = data_cube['anio'].astype(str) + ' - ' + data_cube['mes'].astype(str)
 data_cube['dim_estudiante'] = data_cube['nivel_educativo'].astype(str) + ' - ' + data_cube['sexo']
-data_cube['dim_escuela'] = data_cube['estado'].astype(str) + ' - ' + data_cube['nombre_escuela']
+data_cube['dim_escuela'] = data_cube['estado'].astype(str)
 data_cube['dim_causa'] = data_cube['causa_principal']  # O agrega más columnas si quieres
 
 # 8. Visualización 3D (ajusta los nombres según tus datos)
