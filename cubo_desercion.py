@@ -1,38 +1,52 @@
 import pandas as pd
 import plotly.express as px
 
-# Cargar dimensiones desde archivos separados
+# 1. Cargar archivos
 tiempo_df = pd.read_excel('tiempo.xlsx')
 estudiante_df = pd.read_excel('estudiante.xlsx')
 escuela_df = pd.read_excel('escuelas.xlsx')
 causa_df = pd.read_excel('causas.xlsx')
 
-# Simular hechos uniendo por índices
+# 2. Generar ID para estudiante y tiempo
+estudiante_df = estudiante_df.copy()
+estudiante_df['id_estudiante'] = range(1, len(estudiante_df) + 1)
+
+tiempo_df = tiempo_df.copy()
+tiempo_df['id_tiempo'] = range(1, len(tiempo_df) + 1)
+
+# 3. Renombrar columna de causa
+causa_df = causa_df.rename(columns={'id_causa_desercion': 'id_causa'})
+
+# 4. Asegurar que solo se usan los primeros N registros comunes
 num_registros = min(len(tiempo_df), len(estudiante_df), len(escuela_df), len(causa_df))
+
 hechos_df = pd.DataFrame({
     'id_hecho': range(1, num_registros + 1),
-    'id_tiempo': range(1, num_registros + 1),
-    'id_estudiante': range(1, num_registros + 1),
-    'id_escuela': range(1, num_registros + 1),
-    'id_causa': range(1, num_registros + 1),
+    'id_tiempo': tiempo_df['id_tiempo'][:num_registros].values,
+    'id_estudiante': estudiante_df['id_estudiante'][:num_registros].values,
+    'id_escuela': escuela_df['id_escuela'][:num_registros].values,
+    'id_causa': causa_df['id_causa'][:num_registros].values,
 })
 
-# Unir todas las dimensiones al hecho
+# 5. Unir todo en el cubo
 data_cube = hechos_df \
-    .merge(tiempo_df.reset_index().rename(columns={'index': 'id_tiempo'}), on='id_tiempo') \
-    .merge(estudiante_df.reset_index().rename(columns={'index': 'id_estudiante'}), on='id_estudiante') \
-    .merge(escuela_df.reset_index().rename(columns={'index': 'id_escuela'}), on='id_escuela') \
-    .merge(causa_df.reset_index().rename(columns={'index': 'id_causa'}), on='id_causa')
+    .merge(tiempo_df, on='id_tiempo') \
+    .merge(estudiante_df, on='id_estudiante') \
+    .merge(escuela_df, on='id_escuela') \
+    .merge(causa_df, on='id_causa')
 
-# Agrega columna de conteo para la medida
+# 6. Agregar columna de conteo
 data_cube['conteo'] = 1
 
-# Visualización 3D con Plotly (usa Año, Nivel educativo y Estado como ejes)
+# 7. Mostrar columnas para verificar nombres
+print("Columnas del cubo:", data_cube.columns.tolist())
+
+# 8. Visualización 3D (ajusta los nombres según tus datos)
 fig = px.scatter_3d(
     data_cube,
-    x='Año',
-    y='Nivel educativo',
-    z='Estado',
+    x='Año',                      # Asegúrate de que estas columnas existen en tus archivos
+    y='Nivel Educativo',          # Verifica nombre exacto (puede ser "Nivel educativo" o similar)
+    z='estado',                   # En minúsculas si es el nombre de columna
     color='conteo',
     size='conteo',
     title='Cubo de Datos 3D - Deserción Escolar'
