@@ -98,3 +98,95 @@ pivot_2 = pd.pivot_table(
 
 print(pivot_2)
 
+# Crear nueva columna de década
+data_cube['decada'] = (data_cube['anio'] // 10) * 10
+
+# Roll-Up por década y causa
+rollup_df = pd.pivot_table(
+    data_cube,
+    values='conteo',
+    index='decada',
+    columns='causa_principal',
+    aggfunc='sum',
+    fill_value=0
+)
+
+print("Roll-Up (por década y causa de deserción):")
+print(rollup_df)
+
+
+
+# Drill-Down a nivel año-mes
+data_cube['anio_mes'] = data_cube['fecha'].dt.strftime('%Y-%m')
+
+drilldown_df = pd.pivot_table(
+    data_cube,
+    values='conteo',
+    index='anio_mes',
+    columns='causa_principal',
+    aggfunc='sum',
+    fill_value=0
+)
+
+print("Drill-Down (por año-mes y causa):")
+print(drilldown_df)
+
+
+# Cross-tabulation: Estados vs Nivel Educativo
+cross_tab = pd.crosstab(
+    data_cube['estado'],
+    data_cube['nivel_educativo'],
+    values=data_cube['conteo'],
+    aggfunc='sum'
+).fillna(0)
+
+print("Cross-Tabulation (estado vs nivel educativo):")
+print(cross_tab)
+
+
+dice_df = data_cube[
+    (data_cube['nivel_educativo'].isin(['Secundaria', 'Media Superior'])) &
+    (data_cube['estado'].isin(['CDMX', 'Jalisco']))
+]
+
+dice_pivot = pd.pivot_table(
+    dice_df,
+    values='conteo',
+    index='estado',
+    columns='nivel_educativo',
+    aggfunc='sum',
+    fill_value=0
+)
+
+
+slice_df = data_cube[data_cube['anio'] == 2021]
+
+slice_pivot = pd.pivot_table(
+    slice_df,
+    values='conteo',
+    index='anio',
+    columns='causa_principal',
+    aggfunc='sum',
+    fill_value=0
+)
+
+print("Slice (solo año 2021):")
+print(slice_pivot)
+
+print("Dice (estado en ['CDMX', 'Jalisco'] y nivel educativo en ['Secundaria', 'Media Superior']):")
+print(dice_pivot)
+
+
+slice_df = data_cube[data_cube['anio'] == 2021]
+
+slice_pivot = pd.pivot_table(
+    slice_df,
+    values='conteo',
+    index='anio',
+    columns='causa_principal',
+    aggfunc='sum',
+    fill_value=0
+)
+
+print("Slice (solo año 2021):")
+print(slice_pivot)
