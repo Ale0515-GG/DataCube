@@ -1,24 +1,40 @@
 import pandas as pd
 import plotly.express as px
 
-# Leer los datos desde el archivo Excel
-df = pd.read_excel('educacion.xlsx')
+# Leer el Excel saltando metadatos
+df = pd.read_excel('Educacion.xlsx', skiprows=5)
 
-# Mostrar la tabla original
-print("== Datos del archivo Excel ==")
-print(df)
-
-# Cubo 3D con Plotly
-fig = px.scatter_3d(
-    df,
-    x='anio',               # Eje X: Año
-    y='nivel_educativo',    # Eje Y: Nivel educativo
-    z='causa',              # Eje Z: Causa de deserción
-    color='casos',          # Color: número de casos
-    size='casos',           # Tamaño del punto según número de casos
-    symbol='sexo',          # Diferenciar por sexo
-    title='Cubo de Datos 3D - Deserción Escolar'
+# Reorganizar a formato largo
+df_long = df.melt(
+    id_vars=['Entidad federativa', 'Nivel educativo'],
+    var_name='anio',
+    value_name='casos'
 )
 
-# Mostrar el gráfico interactivo
+# Convertir casos a numérico, errores como NaN
+df_long['casos'] = pd.to_numeric(df_long['casos'], errors='coerce')
+
+# Eliminar valores nulos
+df_long.dropna(subset=['casos'], inplace=True)
+
+# Eliminar o ajustar valores negativos
+df_long = df_long[df_long['casos'] >= 0]
+
+# Convertir año a texto
+df_long['anio'] = df_long['anio'].astype(str)
+
+# Escalar los tamaños si los valores son muy pequeños
+df_long['tamano'] = df_long['casos'] * 5  # ajusta el multiplicador según visualización
+
+# Crear gráfico 3D
+fig = px.scatter_3d(
+    df_long,
+    x='anio',
+    y='Nivel educativo',
+    z='Entidad federativa',
+    color='casos',
+    size='tamano',
+    title='Cubo 3D - Tasa de Abandono Escolar'
+)
+
 fig.show()
