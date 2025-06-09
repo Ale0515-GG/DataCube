@@ -8,16 +8,25 @@ escuela_df = pd.read_excel('escuelas.xlsx')
 causa_df = pd.read_excel('causas.xlsx')
 
 # 2. Generar ID para estudiante y tiempo
-estudiante_df = estudiante_df.copy()
 estudiante_df['id_estudiante'] = range(1, len(estudiante_df) + 1)
-
-tiempo_df = tiempo_df.copy()
 tiempo_df['id_tiempo'] = range(1, len(tiempo_df) + 1)
+
+# 🔁 Convertir mes y año en fecha real para orden correcto
+meses_map = {
+    'Enero': 1, 'Febrero': 2, 'Marzo': 3, 'Abril': 4,
+    'Mayo': 5, 'Junio': 6, 'Julio': 7, 'Agosto': 8,
+    'Septiembre': 9, 'Octubre': 10, 'Noviembre': 11, 'Diciembre': 12
+}
+tiempo_df['fecha'] = pd.to_datetime({
+    'year': tiempo_df['anio'],
+    'month': tiempo_df['mes'].map(meses_map),
+    'day': 1
+})
 
 # 3. Renombrar columna de causa
 causa_df = causa_df.rename(columns={'id_causa_desercion': 'id_causa'})
 
-# 4. Asegurar que solo se usan los primeros N registros comunes
+# 4. Asegurar mismo número de registros
 num_registros = min(len(tiempo_df), len(estudiante_df), len(escuela_df), len(causa_df))
 
 hechos_df = pd.DataFrame({
@@ -28,33 +37,49 @@ hechos_df = pd.DataFrame({
     'id_causa': causa_df['id_causa'][:num_registros].values,
 })
 
-# 5. Unir todo en el cubo
+# 5. Unir tablas
 data_cube = hechos_df \
     .merge(tiempo_df, on='id_tiempo') \
     .merge(estudiante_df, on='id_estudiante') \
     .merge(escuela_df, on='id_escuela') \
     .merge(causa_df, on='id_causa')
 
-# 6. Agregar columna de conteo
+# 6. Agregar conteo
 data_cube['conteo'] = 1
 
-# 7. Mostrar columnas para verificar nombres
-#print("Columnas del cubo:", data_cube.columns.tolist())
+# 7. Crear dimensiones amigables
+data_cube['dim_tiempo'] = data_cube['fecha'].dt.strftime('%Y-%m')
 
-data_cube['dim_tiempo'] = data_cube['anio'].astype(str) + ' - ' + data_cube['mes'].astype(str)
-data_cube['dim_estudiante'] = data_cube['nivel_educativo'].astype(str) + ' - ' + data_cube['sexo']
+# Abreviar sexo y construir etiqueta corta para estudiantes
+data_cube['sexo_abbr'] = data_cube['sexo'].map({'Masculino': 'M', 'Femenino': 'F'})
+data_cube['dim_estudiante'] = data_cube['nivel_educativo'].astype(str) + ' (' + data_cube['sexo_abbr'] + ')'
+
+# Asegurar que todos los estados están presentes
 data_cube['dim_escuela'] = data_cube['estado'].astype(str)
-data_cube['dim_causa'] = data_cube['causa_principal']  # O agrega más columnas si quieres
 
-# 8. Visualización 3D (ajusta los nombres según tus datos)
+# Causa
+data_cube['dim_causa'] = data_cube['causa_principal']
+
+# 8. Visualización 3D
 fig = px.scatter_3d(
-    data_cube,
+    data_cube.sort_values('fecha'),
     x='dim_tiempo',
     y='dim_estudiante',
     z='dim_escuela',
     color='dim_causa',
     size='conteo',
-    hover_data=['anio', 'nivel_educativo', 'estado', 'causa_principal'],  # Más detalles al pasar el cursor
+    hover_data=['anio', 'mes', 'nivel_educativo', 'sexo', 'estado', 'causa_principal'],
     title='Cubo de Datos 3D con Todas las Dimensiones'
 )
+
+fig.update_layout(
+    scene=dict(
+        xaxis_title='Fecha',
+        yaxis_title='Estudiante',
+        zaxis_title='Estado',
+    ),
+    margin=dict(l=0, r=0, b=0, t=40),
+    height=700
+)
+
 fig.show()
