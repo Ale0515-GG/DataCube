@@ -39,17 +39,22 @@ data_cube = hechos_df \
 data_cube['conteo'] = 1
 
 # 7. Mostrar columnas para verificar nombres
-print("Columnas del cubo:", data_cube.columns.tolist())
+#print("Columnas del cubo:", data_cube.columns.tolist())
+
+data_cube['dim_tiempo'] = data_cube['Año'].astype(str) + ' - ' + data_cube['Mes'].astype(str)
+data_cube['dim_estudiante'] = data_cube['Nivel Educativo'].astype(str) + ' - ' + data_cube['Sexo']
+data_cube['dim_escuela'] = data_cube['estado'].astype(str) + ' - ' + data_cube['nombre_escuela']
+data_cube['dim_causa'] = data_cube['causa_principal']  # O agrega más columnas si quieres
 
 # 8. Visualización 3D (ajusta los nombres según tus datos)
 fig = px.scatter_3d(
     data_cube,
-    x='Año',                      # Asegúrate de que estas columnas existen en tus archivos
-    y='Nivel Educativo',          # Verifica nombre exacto (puede ser "Nivel educativo" o similar)
-    z='estado',                   # En minúsculas si es el nombre de columna
-    color='conteo',
+    x='dim_tiempo',
+    y='dim_estudiante',
+    z='dim_escuela',
+    color='dim_causa',
     size='conteo',
-    title='Cubo de Datos 3D - Deserción Escolar'
+    hover_data=['Año', 'Nivel Educativo', 'estado', 'causa_principal'],  # Más detalles al pasar el cursor
+    title='Cubo de Datos 3D con Todas las Dimensiones'
 )
-
 fig.show()
