@@ -41,8 +41,8 @@ data_cube['conteo'] = 1
 # 7. Mostrar columnas para verificar nombres
 #print("Columnas del cubo:", data_cube.columns.tolist())
 
-data_cube['dim_tiempo'] = data_cube['Año'].astype(str) + ' - ' + data_cube['Mes'].astype(str)
-data_cube['dim_estudiante'] = data_cube['Nivel Educativo'].astype(str) + ' - ' + data_cube['Sexo']
+data_cube['dim_tiempo'] = data_cube['anio'].astype(str) + ' - ' + data_cube['mes'].astype(str)
+data_cube['dim_estudiante'] = data_cube['nivel_educativo'].astype(str) + ' - ' + data_cube['sexo']
 data_cube['dim_escuela'] = data_cube['estado'].astype(str) + ' - ' + data_cube['nombre_escuela']
 data_cube['dim_causa'] = data_cube['causa_principal']  # O agrega más columnas si quieres
 
@@ -54,7 +54,7 @@ fig = px.scatter_3d(
     z='dim_escuela',
     color='dim_causa',
     size='conteo',
-    hover_data=['Año', 'Nivel Educativo', 'estado', 'causa_principal'],  # Más detalles al pasar el cursor
+    hover_data=['anio', 'nivel_educativo', 'estado', 'causa_principal'],  # Más detalles al pasar el cursor
     title='Cubo de Datos 3D con Todas las Dimensiones'
 )
 fig.show()
