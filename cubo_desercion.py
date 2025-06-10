@@ -12,7 +12,7 @@ causa_df = pd.read_excel('causas.xlsx')
 estudiante_df['id_estudiante'] = range(1, len(estudiante_df) + 1)
 tiempo_df['id_tiempo'] = range(1, len(tiempo_df) + 1)
 
-# 🔁 Convertir mes y año en fecha real para orden correcto
+# Convertir mes y año en fecha real para orden correcto
 meses_map = {
     'Enero': 1, 'Febrero': 2, 'Marzo': 3, 'Abril': 4,
     'Mayo': 5, 'Junio': 6, 'Julio': 7, 'Agosto': 8,
